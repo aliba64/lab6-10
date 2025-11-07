@@ -18,12 +18,14 @@ public class Lab6 {
         });
     }
 
-    // интегрируемая функция
-    static double f(double x) { return Math.sqrt(Math.exp(x) - 0.5); }
+    // Подынтегральная функция
+    static double f(double x) {
+        return Math.sqrt(Math.exp(x) - 0.5);
+    }
 
     static final double a = 0.2, b = 2.5;
 
-    // составная трапеция
+    // Составная трапеция
     static double trap(int n) {
         double h = (b - a) / n;
         double sum = 0.5 * (f(a) + f(b));
@@ -31,18 +33,17 @@ public class Lab6 {
         return h * sum;
     }
 
-    // составный Симпсон (n четно)
+    // Составной метод Симпсона (n четно)
     static double simpson(int n) {
         if ((n & 1) == 1) throw new IllegalArgumentException("n must be even for Simpson");
         double h = (b - a) / n;
         double s1 = 0, s2 = 0;
-        for (int j = 1; j <= n / 2; j++) s1 += f(a + (2 * j - 1) * h);        // нечетные
-        for (int j = 1; j <= n / 2 - 1; j++) s2 += f(a + (2 * j) * h);        // четные, кроме концов
+        for (int j = 1; j <= n / 2; j++) s1 += f(a + (2 * j - 1) * h);
+        for (int j = 1; j <= n / 2 - 1; j++) s2 += f(a + (2 * j) * h);
         return (h / 3.0) * (f(a) + 2 * s2 + 4 * s1 + f(b));
     }
 
-    // составные прямоугольники
-    // Левые прямоугольники (left Riemann sum)
+    // Левые прямоугольники
     static double rectLeft(int n) {
         double h = (b - a) / n;
         double sum = 0;
@@ -50,7 +51,7 @@ public class Lab6 {
         return h * sum;
     }
 
-    // Правые прямоугольники (right Riemann sum)
+    // Правые прямоугольники
     static double rectRight(int n) {
         double h = (b - a) / n;
         double sum = 0;
@@ -58,7 +59,7 @@ public class Lab6 {
         return h * sum;
     }
 
-    // Средние прямоугольники (midpoint rule)
+    // Средние прямоугольники
     static double rectMid(int n) {
         double h = (b - a) / n;
         double sum = 0;
@@ -66,7 +67,7 @@ public class Lab6 {
         return h * sum;
     }
 
-    // Гаусс–Лежандр на [a,b] с узлами на [0,1] из методички
+    // Метод Гаусса–Лежандра на [a,b]
     static double gauss(int m) {
         GLRule r = GLRule.of(m);
         double res = 0;
@@ -77,10 +78,18 @@ public class Lab6 {
         return (b - a) * res;
     }
 
-    // Наборы узлов/весов на [0,1] (симметричны относительно 0.5)
+    // Узлы и веса квадратурных формул Гаусса на [0,1]
     static final class GLRule {
-        final int m; final double[] t; final double[] A;
-        GLRule(int m, double[] t, double[] A) { this.m = m; this.t = t; this.A = A; }
+        final int m;
+        final double[] t;
+        final double[] A;
+
+        GLRule(int m, double[] t, double[] A) {
+            this.m = m;
+            this.t = t;
+            this.A = A;
+        }
+
         static GLRule of(int m) {
             switch (m) {
                 case 3:  return new GLRule(3,
@@ -114,12 +123,17 @@ public class Lab6 {
         private final JLabel rectLeftLbl = new JLabel();
         private final JLabel rectRightLbl = new JLabel();
         private final JLabel rectMidLbl = new JLabel();
+        private final JLabel trapLbl = new JLabel();
+        private final JLabel simpLbl = new JLabel();
+        private final JLabel gaussLbl = new JLabel();
+        private final JLabel refLbl = new JLabel();
 
-        private final JLabel trapLbl = new JLabel(), simpLbl = new JLabel(),
-                gaussLbl = new JLabel(), refLbl = new JLabel();
-
-        private final JLabel eRectLeftLbl = new JLabel(), eRectRightLbl = new JLabel(), eRectMidLbl = new JLabel(),
-                eTrapLbl = new JLabel(), eSimpLbl = new JLabel(), eGaussLbl = new JLabel();
+        private final JLabel eRectLeftLbl = new JLabel();
+        private final JLabel eRectRightLbl = new JLabel();
+        private final JLabel eRectMidLbl = new JLabel();
+        private final JLabel eTrapLbl = new JLabel();
+        private final JLabel eSimpLbl = new JLabel();
+        private final JLabel eGaussLbl = new JLabel();
 
         private final PlotPanel plot = new PlotPanel();
 
@@ -137,7 +151,6 @@ public class Lab6 {
             controls.add(btn);
             top.add(controls, BorderLayout.NORTH);
 
-            // Цель работы
             JLabel goal = new JLabel("<html><b>Цель работы:</b> изучение методов численного интегрирования, вычисление определённого интеграла от заданной функции методами прямоугольников и Гаусса.</html>");
             goal.setBorder(new EmptyBorder(6,6,6,6));
             top.add(goal, BorderLayout.SOUTH);
@@ -146,12 +159,11 @@ public class Lab6 {
 
             JPanel center = new JPanel(new GridLayout(1,2,10,10));
             center.add(new JPanel(new BorderLayout()) {{
-                setBorder(BorderFactory.createTitledBorder("График f(x)=sqrt(e^x-0.5) на [0.2,2.5]"));
+                setBorder(BorderFactory.createTitledBorder("График функции"));
                 add(plot, BorderLayout.CENTER);
             }});
             center.add(new JPanel(new BorderLayout()) {{
                 setBorder(BorderFactory.createTitledBorder("Результаты"));
-                // увеличим количество строк, чтобы вместить прямоугольники
                 JPanel g = new JPanel(new GridLayout(10,1,6,6));
                 g.add(line("Левые прямоугольники:", rectLeftLbl));
                 g.add(line("Правые прямоугольники:", rectRightLbl));
@@ -164,7 +176,6 @@ public class Lab6 {
                 g.add(line("|ε| Средние:", eRectMidLbl));
                 g.add(line("|ε| Правые:", eRectRightLbl));
                 g.add(line("|ε| Трапеции:", eTrapLbl));
-                // подсимпсон и гаусс ошибки отдельно ниже
                 JPanel bottomErrors = new JPanel(new GridLayout(2,1));
                 bottomErrors.add(line("|ε| Симпсон:", eSimpLbl));
                 bottomErrors.add(line("|ε| Гаусс(m):", eGaussLbl));
@@ -194,14 +205,13 @@ public class Lab6 {
             int n = (Integer) nSpin.getValue();
             int m = (Integer) mBox.getSelectedItem();
 
-            // вычисления
             double IrectLeft = rectLeft(n);
             double IrectRight = rectRight(n);
             double IrectMid = rectMid(n);
             double Itrap = trap(n);
-            double Isim = (n % 2 == 0) ? simpson(n) : simpson(n+1); // если нечётно, используем n+1
+            double Isim = (n % 2 == 0) ? simpson(n) : simpson(n+1);
             double Igauss = gauss(m);
-            double Iref = gauss(11); // эталон
+            double Iref = gauss(11);
 
             DecimalFormat df = new DecimalFormat("0.0000000000");
             rectLeftLbl.setText(df.format(IrectLeft));
@@ -225,23 +235,25 @@ public class Lab6 {
 
     static final class PlotPanel extends JPanel {
         PlotPanel() {
-            setPreferredSize(new Dimension(780, 520));
+            setPreferredSize(new Dimension(820, 580));
             setBackground(Color.white);
         }
+
         @Override protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             try {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
                 Insets ins = getInsets();
                 int W = getWidth() - ins.left - ins.right;
                 int H = getHeight() - ins.top - ins.bottom;
-                int pad = 48;
+                int pad = 70;
                 int x0 = ins.left + pad, y0 = ins.top + pad;
                 int w = W - 2*pad, h = H - 2*pad;
 
-                // диапазон по f(x)
                 double ymin = Double.POSITIVE_INFINITY, ymax = Double.NEGATIVE_INFINITY;
                 int S = 1500;
                 for (int i = 0; i <= S; i++) {
@@ -251,8 +263,9 @@ public class Lab6 {
                     ymax = Math.max(ymax, y);
                 }
                 if (ymax == ymin) { ymax += 1; ymin -= 1; }
-                double margin = 0.08*(ymax - ymin);
+                double margin = 0.12*(ymax - ymin);
                 ymin -= margin; ymax += margin;
+                if (ymin > 0) ymin = 0;
 
                 final int x0f=x0, y0f=y0, wf=w, hf=h;
                 final double yminf=ymin, ymaxf=ymax;
@@ -261,18 +274,56 @@ public class Lab6 {
                 DoubleUnaryOperator X = xx -> x0f + (xx - a) * (wf / (b - a));
                 DoubleUnaryOperator Y = yy -> y0f + (ymaxf - yy) * scale;
 
-                // сетка
-                g2.setColor(new Color(235,235,235));
+                // Заголовок с уравнением
+                g2.setFont(new Font("Serif", Font.BOLD, 22));
+                g2.setColor(new Color(40, 40, 100));
+                String title = "f(x) = √(e^x - 0.5)";
+                FontMetrics fm = g2.getFontMetrics();
+                int titleWidth = fm.stringWidth(title);
+                g2.drawString(title, x0 + (w - titleWidth) / 2, y0 - 38);
+
+                // Подзаголовок
+                g2.setFont(new Font("SansSerif", Font.PLAIN, 16));
+                g2.setColor(new Color(80, 80, 80));
+                String subtitle = String.format("Интеграл на отрезке [%.1f, %.1f]", a, b);
+                fm = g2.getFontMetrics();
+                titleWidth = fm.stringWidth(subtitle);
+                g2.drawString(subtitle, x0 + (w - titleWidth) / 2, y0 - 18);
+
+                // Сетка
+                g2.setColor(new Color(240,240,240));
+                g2.setStroke(new BasicStroke(1.0f));
                 for (int i=0;i<=10;i++){
                     int xx = x0 + (int)Math.round(w*i/10.0);
                     int yy = y0 + (int)Math.round(h*i/10.0);
                     g2.drawLine(xx,y0,xx,y0+h);
                     g2.drawLine(x0,yy,x0+w,yy);
                 }
-                g2.setColor(Color.black);
+
+                // Рамка
+                g2.setColor(new Color(60,60,60));
+                g2.setStroke(new BasicStroke(2.0f));
                 g2.drawRect(x0,y0,w,h);
 
-                // кривая
+                // Заполнение под кривой
+                Path2D fillPath = new Path2D.Double();
+                fillPath.moveTo(X.applyAsDouble(a), Y.applyAsDouble(0));
+                for (int i = 0; i <= S; i++) {
+                    double x = a + (b - a) * (i/(double)S);
+                    double y = f(x);
+                    fillPath.lineTo(X.applyAsDouble(x), Y.applyAsDouble(y));
+                }
+                fillPath.lineTo(X.applyAsDouble(b), Y.applyAsDouble(0));
+                fillPath.closePath();
+
+                GradientPaint gp = new GradientPaint(
+                        x0, y0 + h, new Color(180, 220, 255, 100),
+                        x0, y0, new Color(100, 150, 255, 180)
+                );
+                g2.setPaint(gp);
+                g2.fill(fillPath);
+
+                // Кривая
                 Path2D path = new Path2D.Double();
                 for (int i = 0; i <= S; i++) {
                     double x = a + (b - a) * (i/(double)S);
@@ -281,12 +332,63 @@ public class Lab6 {
                     double py = Y.applyAsDouble(y);
                     if (i==0) path.moveTo(px,py); else path.lineTo(px,py);
                 }
-                g2.setStroke(new BasicStroke(2.0f));
-                g2.setColor(new Color(200,0,0));
+                g2.setStroke(new BasicStroke(3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.setColor(new Color(0, 80, 180));
                 g2.draw(path);
 
-                g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 13f));
-                g2.drawString(String.format("a=%.2f, b=%.2f, f(x)=sqrt(e^x-0.5)", a, b), x0, y0-16);
+                // Метки X
+                g2.setFont(new Font("SansSerif", Font.PLAIN, 13));
+                g2.setColor(new Color(50,50,50));
+                DecimalFormat df = new DecimalFormat("0.0");
+                for (int i = 0; i <= 10; i++) {
+                    double xval = a + (b - a) * (i / 10.0);
+                    int xx = x0 + (int)Math.round(w*i/10.0);
+                    g2.drawLine(xx, y0 + h, xx, y0 + h + 5);
+                    String label = df.format(xval);
+                    fm = g2.getFontMetrics();
+                    int labelW = fm.stringWidth(label);
+                    g2.drawString(label, xx - labelW/2, y0 + h + 20);
+                }
+
+                // Метки Y
+                for (int i = 0; i <= 10; i++) {
+                    double yval = yminf + (ymaxf - yminf) * (i / 10.0);
+                    int yy = y0 + h - (int)Math.round(h*i/10.0);
+                    g2.drawLine(x0 - 5, yy, x0, yy);
+                    String label = df.format(yval);
+                    fm = g2.getFontMetrics();
+                    int labelW = fm.stringWidth(label);
+                    g2.drawString(label, x0 - labelW - 10, yy + 5);
+                }
+
+                // Подписи осей
+                g2.setFont(new Font("SansSerif", Font.BOLD, 15));
+                g2.setColor(new Color(40,40,40));
+                g2.drawString("x", x0 + w + 10, y0 + h + 5);
+                g2.drawString("f(x)", x0 - 45, y0 - 10);
+
+                // Легенда
+                int legendX = x0 + w - 180;
+                int legendY = y0 + 20;
+                g2.setColor(new Color(255, 255, 255, 220));
+                g2.fillRoundRect(legendX - 8, legendY - 8, 170, 50, 10, 10);
+                g2.setColor(new Color(100, 100, 100));
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawRoundRect(legendX - 8, legendY - 8, 170, 50, 10, 10);
+
+                g2.setColor(new Color(0, 80, 180));
+                g2.setStroke(new BasicStroke(3.0f));
+                g2.drawLine(legendX, legendY + 5, legendX + 30, legendY + 5);
+
+                g2.setFont(new Font("SansSerif", Font.PLAIN, 13));
+                g2.setColor(new Color(40, 40, 40));
+                g2.drawString("График функции", legendX + 38, legendY + 10);
+
+                g2.setColor(new Color(100, 150, 255, 150));
+                g2.fillRect(legendX, legendY + 20, 30, 15);
+                g2.setColor(new Color(40, 40, 40));
+                g2.drawString("Площадь (∫f(x)dx)", legendX + 38, legendY + 32);
+
             } finally {
                 g2.dispose();
             }
